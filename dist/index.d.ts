@@ -3,6 +3,81 @@ import * as React$1 from 'react';
 import React__default, { PropsWithChildren } from 'react';
 import { Emitter } from 'mitt';
 
+declare let styles: {
+    container: {
+        position: "absolute";
+        left: number;
+        top: number;
+        right: number;
+        bottom: number;
+        zIndex: number;
+    };
+    arrow: {
+        position: "absolute";
+        borderColor: string;
+        borderWidth: number;
+    };
+    tooltip: {
+        position: "absolute";
+        paddingTop: number;
+        paddingHorizontal: number;
+        backgroundColor: string;
+        borderRadius: number;
+        overflow: "hidden";
+    };
+    tooltipText: {};
+    tooltipContainer: {
+        flex: number;
+    };
+    stepNumberContainer: {
+        position: "absolute";
+        width: number;
+        height: number;
+        overflow: "hidden";
+        zIndex: number;
+    };
+    stepNumber: {
+        flex: number;
+        alignItems: "center";
+        justifyContent: "center";
+        borderWidth: number;
+        borderRadius: number;
+        borderColor: string;
+        backgroundColor: string;
+    };
+    stepNumberText: {
+        fontSize: number;
+        backgroundColor: string;
+        color: string;
+    };
+    button: {
+        padding: number;
+    };
+    buttonText: {
+        color: string;
+    };
+    bottomBar: {
+        marginTop: number;
+        flexDirection: "row";
+        justifyContent: "flex-end";
+    };
+    overlayRectangle: {
+        position: "absolute";
+        backgroundColor: string;
+        left: number;
+        top: number;
+        bottom: number;
+        right: number;
+    };
+    overlayContainer: {
+        position: "absolute";
+        left: number;
+        top: number;
+        bottom: number;
+        right: number;
+    };
+};
+
 interface Step {
     name: string;
     order: number;
@@ -43,6 +118,9 @@ interface CopilotOptions {
     margin?: number;
     stopOnOutsideClick?: boolean;
     backdropColor?: string;
+    style?: {
+        [K in keyof typeof styles]?: Partial<(typeof styles)[K]>;
+    };
 }
 
 declare function walkthroughable<P = any>(WrappedComponent: React__default.ComponentType<P>): React__default.FunctionComponent<P>;
@@ -53,8 +131,14 @@ interface Props {
     text: string;
     children: React__default.ReactElement<any>;
     active?: boolean;
+    edge?: {
+        top?: number;
+        left?: number;
+        right?: number;
+        bottom?: number;
+    };
 }
-declare const CopilotStep: ({ name, order, text, children, active, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
+declare const CopilotStep: ({ name, order, text, children, active, edge, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
 
 type Events = {
     start: undefined;
@@ -77,7 +161,7 @@ interface CopilotContextType {
     currentStepNumber: number;
     totalStepsNumber: number;
 }
-declare const CopilotProvider: ({ verticalOffset, children, ...rest }: PropsWithChildren<CopilotOptions>) => React__default.JSX.Element;
+declare const CopilotProvider: ({ verticalOffset, children, style, ...rest }: PropsWithChildren<CopilotOptions>) => React__default.JSX.Element;
 declare const useCopilot: () => CopilotContextType;
 
 declare const DefaultUI: {

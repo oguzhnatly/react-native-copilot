@@ -7,7 +7,7 @@ export const MARGIN: number = 13;
 export const OFFSET_WIDTH: number = 4;
 export const ARROW_SIZE: number = 6;
 
-export const styles = StyleSheet.create({
+let styles = StyleSheet.create({
   container: {
     position: "absolute",
     left: 0,
@@ -81,3 +81,21 @@ export const styles = StyleSheet.create({
     right: 0,
   },
 });
+
+const RNCSetStyle = (stylesToUpdate: {
+  [K in keyof typeof styles]?: Partial<(typeof styles)[K]>;
+}) => {
+  styles = {
+    ...styles,
+    ...Object.keys(stylesToUpdate).reduce<any>((acc, key) => {
+      const styleKey = key as keyof typeof styles;
+      acc[styleKey] = {
+        ...styles[styleKey],
+        ...stylesToUpdate[styleKey],
+      };
+      return acc;
+    }, {}),
+  };
+};
+
+export { styles, RNCSetStyle };

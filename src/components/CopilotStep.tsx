@@ -9,6 +9,12 @@ interface Props {
   text: string;
   children: React.ReactElement<any>;
   active?: boolean;
+  edge?: {
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
+  };
 }
 
 export const CopilotStep = ({
@@ -17,10 +23,22 @@ export const CopilotStep = ({
   text,
   children,
   active = true,
+  edge = {
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
 }: Props) => {
   const registeredName = useRef<string | null>(null);
   const { registerStep, unregisterStep } = useCopilot();
   const wrapperRef = React.useRef<NativeMethods | null>(null);
+  const safeEdge = {
+    top: edge?.top ?? 0,
+    left: edge?.left ?? 0,
+    right: edge?.right ?? 0,
+    bottom: edge?.bottom ?? 0,
+  };
 
   const measure = async () => {
     return await new Promise<{
@@ -34,10 +52,10 @@ export const CopilotStep = ({
         if (wrapperRef.current != null && "measure" in wrapperRef.current) {
           wrapperRef.current.measure((_ox, _oy, width, height, x, y) => {
             resolve({
-              x,
-              y,
-              width,
-              height,
+              x: x - safeEdge.left,
+              y: y - safeEdge.top,
+              width: width + safeEdge.left + safeEdge.right,
+              height: height + safeEdge.top + safeEdge.bottom,
             });
           });
         } else {
@@ -81,7 +99,7 @@ export const CopilotStep = ({
       ref: wrapperRef,
       onLayout: () => {}, // Android hack
     }),
-    []
+    [],
   );
 
   return React.cloneElement(children, { copilot: copilotProps });

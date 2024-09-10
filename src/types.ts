@@ -4,6 +4,7 @@ import type {
   NativeMethods,
   ViewStyle,
 } from "react-native";
+import type { styles } from "./components/style";
 
 export type WalktroughedComponent = NativeMethods & React.ComponentType<any>;
 
@@ -81,4 +82,5 @@ export interface CopilotOptions {
   margin?: number;
   stopOnOutsideClick?: boolean;
   backdropColor?: string;
+  style?: { [K in keyof typeof styles]?: Partial<(typeof styles)[K]> };
 }

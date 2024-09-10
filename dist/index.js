@@ -81,7 +81,7 @@ var __async = (__this, __arguments, generator) => {
 };
 
 // src/components/style.ts
-var import_react_native, STEP_NUMBER_RADIUS, STEP_NUMBER_DIAMETER, ZINDEX, MARGIN, OFFSET_WIDTH, ARROW_SIZE, styles;
+var import_react_native, STEP_NUMBER_RADIUS, STEP_NUMBER_DIAMETER, ZINDEX, MARGIN, OFFSET_WIDTH, ARROW_SIZE, styles, RNCSetStyle;
 var init_style = __esm({
   "src/components/style.ts"() {
     "use strict";
@@ -166,6 +166,13 @@ var init_style = __esm({
         right: 0
       }
     });
+    RNCSetStyle = (stylesToUpdate) => {
+      styles = __spreadValues(__spreadValues({}, styles), Object.keys(stylesToUpdate).reduce((acc, key) => {
+        const styleKey = key;
+        acc[styleKey] = __spreadValues(__spreadValues({}, styles[styleKey]), stylesToUpdate[styleKey]);
+        return acc;
+      }, {}));
+    };
   }
 });
 
@@ -890,16 +897,19 @@ var CopilotContext = (0, import_react8.createContext)(void 0);
 var CopilotProvider = (_a) => {
   var _b = _a, {
     verticalOffset = 0,
-    children
+    children,
+    style = {}
   } = _b, rest = __objRest(_b, [
     "verticalOffset",
-    "children"
+    "children",
+    "style"
   ]);
   const startTries = (0, import_react8.useRef)(0);
   const copilotEvents = (0, import_react8.useRef)((0, import_mitt.default)()).current;
   const modal = (0, import_react8.useRef)(null);
   const [visible, setVisibility] = useStateWithAwait(false);
   const [scrollView, setScrollView] = (0, import_react8.useState)(null);
+  RNCSetStyle(style);
   const {
     currentStep,
     currentStepNumber,
@@ -1042,12 +1052,7 @@ var CopilotProvider = (_a) => {
       totalStepsNumber
     ]
   );
-  return /* @__PURE__ */ import_react8.default.createElement(CopilotContext.Provider, { value }, /* @__PURE__ */ import_react8.default.createElement(import_react8.default.Fragment, null, /* @__PURE__ */ import_react8.default.createElement(
-    CopilotModal,
-    __spreadValues({
-      ref: modal
-    }, rest)
-  ), children));
+  return /* @__PURE__ */ import_react8.default.createElement(CopilotContext.Provider, { value }, /* @__PURE__ */ import_react8.default.createElement(import_react8.default.Fragment, null, /* @__PURE__ */ import_react8.default.createElement(CopilotModal, __spreadValues({ ref: modal }, rest)), children));
 };
 var useCopilot = () => {
   const value = (0, import_react8.useContext)(CopilotContext);
@@ -1082,21 +1087,34 @@ var CopilotStep = ({
   order,
   text,
   children,
-  active = true
+  active = true,
+  edge = {
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  }
 }) => {
+  var _a, _b, _c, _d;
   const registeredName = (0, import_react11.useRef)(null);
   const { registerStep, unregisterStep } = useCopilot();
   const wrapperRef = import_react11.default.useRef(null);
+  const safeEdge = {
+    top: (_a = edge == null ? void 0 : edge.top) != null ? _a : 0,
+    left: (_b = edge == null ? void 0 : edge.left) != null ? _b : 0,
+    right: (_c = edge == null ? void 0 : edge.right) != null ? _c : 0,
+    bottom: (_d = edge == null ? void 0 : edge.bottom) != null ? _d : 0
+  };
   const measure = () => __async(void 0, null, function* () {
     return yield new Promise((resolve) => {
       const measure2 = () => {
         if (wrapperRef.current != null && "measure" in wrapperRef.current) {
           wrapperRef.current.measure((_ox, _oy, width, height, x, y) => {
             resolve({
-              x,
-              y,
-              width,
-              height
+              x: x - safeEdge.left,
+              y: y - safeEdge.top,
+              width: width + safeEdge.left + safeEdge.right,
+              height: height + safeEdge.top + safeEdge.bottom
             });
           });
         } else {

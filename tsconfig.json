@@ -3,6 +3,7 @@
   "exclude": ["dist"],
   "include": ["src", "./tsup.config.ts"],
   "compilerOptions": {
+    "jsx": "react",
     "types": ["react-native", "jest", "node"],
     "target": "ES2015"
   }

@@ -29,7 +29,6 @@ import {
   STEP_NUMBER_RADIUS,
   styles,
 } from "./style";
-import { Dimensions } from 'react-native';
 
 type Props = CopilotOptions;
 
@@ -54,11 +53,6 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
       tooltipComponent: TooltipComponent = Tooltip,
       tooltipStyle = {},
       stepNumberComponent: StepNumberComponent = StepNumber,
-      arrowConfiguration: {
-        arrowSize: "large",
-        color: "#fff",
-        position: "center",
-      },
       overlay = typeof NativeModules.RNSVGSvgViewManager !== "undefined"
         ? "svg"
         : "view",
@@ -75,9 +69,10 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
       stopOnOutsideClick = false,
       arrowColor = "#fff",
       arrowSize = ARROW_SIZE,
-      margin = MARGIN
+      arrowPosition = {},
+      margin = MARGIN,
     },
-    ref
+    ref,
   ) {
     const { stop, currentStep, visible } = useCopilot();
     const [tooltipStyles, setTooltipStyles] = useState({});
@@ -88,7 +83,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
     });
     const layoutRef = useRef(makeDefaultLayout());
     const [layout, setLayout] = useState<LayoutRectangle | undefined>(
-      undefined
+      undefined,
     );
     const [maskRect, setMaskRect] = useState<LayoutRectangle | undefined>();
 
@@ -158,35 +153,30 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
         const horizontalPosition =
           relativeToLeft > relativeToRight ? "left" : "right";
 
-        const { arrowSize ,color ,position } = this.props.arrowConfiguration;
-
         const tooltip: ViewStyle = {};
         const arrow: ViewStyle = {};
 
         if (verticalPosition === "bottom") {
-          tooltip.top = rect.top + rect.height + (arrowSize === 'large' ? 18 : MARGIN);
-          arrow.borderBottomColor = color || '#fff';
-          arrow.top = tooltip.top - (arrowSize === 'large' ? 28 : ARROW_SIZE * 2);
+          tooltip.top = rect.y + rect.height + margin;
+          arrow.borderBottomColor = arrowColor;
+          arrow.top = tooltip.top - arrowSize * 2;
         } else {
-          tooltip.bottom = newMeasuredLayout.height - (rect.top - (arrowSize === 'large' ? 18 : MARGIN));
-          arrow.borderTopColor = color || '#fff';
-          arrow.bottom = tooltip.bottom - (arrowSize === 'large' ? 24 : ARROW_SIZE * 2);
+          tooltip.bottom = newMeasuredLayout.height - (rect.y - margin);
+          arrow.borderTopColor = arrowColor;
+          arrow.bottom = tooltip.bottom - ARROW_SIZE * 2;
         }
 
+        const arrowPos = arrowPosition[currentStep?.name ?? ""] ?? "left";
         if (horizontalPosition === "left") {
           tooltip.right = Math.max(
             newMeasuredLayout.width - (rect.x + rect.width),
-            0
+            0,
           );
           tooltip.right =
             tooltip.right === 0 ? tooltip.right + margin : tooltip.right;
           tooltip.maxWidth = newMeasuredLayout.width - tooltip.right - margin;
-          if (Dimensions.get('window').width - tooltip.maxWidth < 40) {
-            if (position === 'center'){
-              arrow.right =  Math.round( tooltip.maxWidth/2);
-            } else {
-              arrow.right = tooltip.right + margin; 
-            }
+          if (arrowPos === "center") {
+            arrow.right = Math.round(tooltip.maxWidth / 2) - margin * 0.75;
           } else {
             arrow.right = tooltip.right + margin;
           }
@@ -195,21 +185,16 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
           tooltip.left =
             tooltip.left === 0 ? tooltip.left + margin : tooltip.left;
           tooltip.maxWidth = newMeasuredLayout.width - tooltip.left - margin;
-          if (Dimensions.get('window').width - tooltip.maxWidth < 40) {
-            if (position === 'center') {
-              arrow.left =  Math.round( tooltip.maxWidth/2);
-            }
-            else {
-              arrow.left = tooltip.left + margin
-            }
+          if (arrowPos === "center") {
+            arrow.left = Math.round(tooltip.maxWidth / 2) + margin * 0.75;
           } else {
-            arrow.left = tooltip.left + margin
+            arrow.left = tooltip.left + margin;
           }
         }
 
-        sanitize(arrow)
-        sanitize(tooltip)
-        sanitize(rect)
+        sanitize(arrow);
+        sanitize(tooltip);
+        sanitize(rect);
 
         const animate = [
           ["top", rect.y],
@@ -225,7 +210,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
                 easing,
                 useNativeDriver: false,
               });
-            })
+            }),
           ).start();
         } else {
           animate.forEach(([key, value]) => {
@@ -252,7 +237,9 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
         isAnimated,
         arrowSize,
         margin,
-      ]
+        arrowPosition,
+        currentStep,
+      ],
     );
 
     const animateMove = useCallback<CopilotModalHandle["animateMove"]>(
@@ -269,7 +256,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
           });
         });
       },
-      [_animateMove]
+      [_animateMove],
     );
 
     const reset = () => {
@@ -296,7 +283,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
           animateMove,
         };
       },
-      [animateMove]
+      [animateMove],
     );
 
     const modalVisible = containerVisible || visible;
@@ -373,14 +360,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
           </Animated.View>
 
           {!!arrowSize && (
-            <Animated.View 
-              key="arrow" 
-              style={[
-                styles.arrow,
-                this.props.arrowConfiguration.arrowSize && {borderWidth: 18}, 
-                this.state.arrow,
-              ]} 
-            />
+            <Animated.View key="arrow" style={[styles.arrow, arrowStyles]} />
           )}
           <Animated.View
             key="tooltip"
@@ -391,7 +371,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
         </>
       );
     }
-  }
+  },
 );
 
 const floorify = (obj: Record<string, any>) => {
@@ -414,4 +394,4 @@ const removeNan = (obj: Record<string, any>) => {
 const sanitize = (obj: Record<any, any>) => {
   floorify(obj);
   removeNan(obj);
-}
+};

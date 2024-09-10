@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { type NativeMethods } from "react-native";
+import type { NativeMethods, ViewStyle } from "react-native";
 
 import { useCopilot } from "../contexts/CopilotProvider";
 
@@ -10,11 +10,13 @@ interface Props {
   children: React.ReactElement<any>;
   active?: boolean;
   edge?: {
-    top?: number;
-    left?: number;
-    right?: number;
-    bottom?: number;
+    x?: number;
+    y?: number;
+    extraWidth?: number;
+    extraHeight?: number;
   };
+  horizontalPosition?: "left" | "right" | "auto";
+  tooltipStyle?: ViewStyle;
 }
 
 export const CopilotStep = ({
@@ -23,21 +25,18 @@ export const CopilotStep = ({
   text,
   children,
   active = true,
-  edge = {
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
+  edge = {},
+  tooltipStyle = {},
+  horizontalPosition = "auto",
 }: Props) => {
   const registeredName = useRef<string | null>(null);
   const { registerStep, unregisterStep } = useCopilot();
   const wrapperRef = React.useRef<NativeMethods | null>(null);
   const safeEdge = {
-    top: edge?.top ?? 0,
-    left: edge?.left ?? 0,
-    right: edge?.right ?? 0,
-    bottom: edge?.bottom ?? 0,
+    x: edge.x ?? 0,
+    y: edge.y ?? 0,
+    extraWidth: edge.extraWidth ?? 0,
+    extraHeight: edge.extraHeight ?? 0,
   };
 
   const measure = async () => {
@@ -52,10 +51,10 @@ export const CopilotStep = ({
         if (wrapperRef.current != null && "measure" in wrapperRef.current) {
           wrapperRef.current.measure((_ox, _oy, width, height, x, y) => {
             resolve({
-              x: x - safeEdge.left,
-              y: y - safeEdge.top,
-              width: width + safeEdge.left + safeEdge.right,
-              height: height + safeEdge.top + safeEdge.bottom,
+              x: x + safeEdge.x,
+              y: y + safeEdge.y,
+              width: width + safeEdge.extraWidth,
+              height: height + safeEdge.extraHeight,
             });
           });
         } else {
@@ -79,6 +78,8 @@ export const CopilotStep = ({
         measure,
         wrapperRef,
         visible: true,
+        style: tooltipStyle,
+        horizontalPosition,
       });
       registeredName.current = name;
     }

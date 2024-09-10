@@ -15,6 +15,8 @@ export interface Step {
   wrapperRef: React.RefObject<NativeMethods>;
   measure: () => Promise<LayoutRectangle>;
   text: string;
+  style?: ViewStyle;
+  horizontalPosition?: "left" | "right" | "auto";
 }
 
 export interface CopilotContext {
@@ -82,5 +84,6 @@ export interface CopilotOptions {
   margin?: number;
   stopOnOutsideClick?: boolean;
   backdropColor?: string;
-  style?: { [K in keyof typeof styles]?: Partial<(typeof styles)[K]> };
+  style?: { [K in keyof typeof styles]?: Partial<ViewStyle> };
+  horizontalPosition?: Step["horizontalPosition"];
 }

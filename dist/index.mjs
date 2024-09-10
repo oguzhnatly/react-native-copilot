@@ -589,7 +589,7 @@ var CopilotModal = forwardRef(
           arrow.bottom = tooltip.bottom - ARROW_SIZE * 2;
         }
         const arrowPos = (_c = arrowPosition[(_b = currentStep == null ? void 0 : currentStep.name) != null ? _b : ""]) != null ? _c : "left";
-        if (horizontalPosition === "left") {
+        if (horizontalPosition === "left" && (currentStep == null ? void 0 : currentStep.horizontalPosition) === "auto" || (currentStep == null ? void 0 : currentStep.horizontalPosition) === "right") {
           tooltip.right = Math.max(
             newMeasuredLayout.width - (rect.x + rect.width),
             0
@@ -762,7 +762,12 @@ var CopilotModal = forwardRef(
         Animated3.View,
         {
           key: "tooltip",
-          style: [styles.tooltip, tooltipStyles, tooltipStyle]
+          style: [
+            styles.tooltip,
+            tooltipStyles,
+            tooltipStyle,
+            currentStep == null ? void 0 : currentStep.style
+          ]
         },
         /* @__PURE__ */ React5.createElement(TooltipComponent, { labels })
       ));
@@ -1096,22 +1101,19 @@ var CopilotStep = ({
   text,
   children,
   active = true,
-  edge = {
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0
-  }
+  edge = {},
+  tooltipStyle = {},
+  horizontalPosition = "auto"
 }) => {
   var _a, _b, _c, _d;
   const registeredName = useRef6(null);
   const { registerStep, unregisterStep } = useCopilot();
   const wrapperRef = React9.useRef(null);
   const safeEdge = {
-    top: (_a = edge == null ? void 0 : edge.top) != null ? _a : 0,
-    left: (_b = edge == null ? void 0 : edge.left) != null ? _b : 0,
-    right: (_c = edge == null ? void 0 : edge.right) != null ? _c : 0,
-    bottom: (_d = edge == null ? void 0 : edge.bottom) != null ? _d : 0
+    x: (_a = edge.x) != null ? _a : 0,
+    y: (_b = edge.y) != null ? _b : 0,
+    extraWidth: (_c = edge.extraWidth) != null ? _c : 0,
+    extraHeight: (_d = edge.extraHeight) != null ? _d : 0
   };
   const measure = () => __async(void 0, null, function* () {
     return yield new Promise((resolve) => {
@@ -1119,10 +1121,10 @@ var CopilotStep = ({
         if (wrapperRef.current != null && "measure" in wrapperRef.current) {
           wrapperRef.current.measure((_ox, _oy, width, height, x, y) => {
             resolve({
-              x: x - safeEdge.left,
-              y: y - safeEdge.top,
-              width: width + safeEdge.left + safeEdge.right,
-              height: height + safeEdge.top + safeEdge.bottom
+              x: x + safeEdge.x,
+              y: y + safeEdge.y,
+              width: width + safeEdge.extraWidth,
+              height: height + safeEdge.extraHeight
             });
           });
         } else {
@@ -1143,7 +1145,9 @@ var CopilotStep = ({
         order,
         measure,
         wrapperRef,
-        visible: true
+        visible: true,
+        style: tooltipStyle,
+        horizontalPosition
       });
       registeredName.current = name;
     }

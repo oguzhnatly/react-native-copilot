@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import type { ViewStyle } from "react-native";
 
 export const STEP_NUMBER_RADIUS: number = 14;
 export const STEP_NUMBER_DIAMETER: number = STEP_NUMBER_RADIUS * 2;
@@ -83,7 +84,7 @@ let styles = StyleSheet.create({
 });
 
 const RNCSetStyle = (stylesToUpdate: {
-  [K in keyof typeof styles]?: Partial<(typeof styles)[K]>;
+  [K in keyof typeof styles]?: Partial<ViewStyle>;
 }) => {
   styles = {
     ...styles,

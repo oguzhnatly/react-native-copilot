@@ -1,4 +1,4 @@
-import { ViewStyle, Animated, NativeMethods, LayoutRectangle, ScrollView } from 'react-native';
+import { ViewStyle, NativeMethods, LayoutRectangle, Animated, ScrollView } from 'react-native';
 import * as React$1 from 'react';
 import React__default, { PropsWithChildren } from 'react';
 import { Emitter } from 'mitt';
@@ -85,6 +85,8 @@ interface Step {
     wrapperRef: React.RefObject<NativeMethods>;
     measure: () => Promise<LayoutRectangle>;
     text: string;
+    style?: ViewStyle;
+    horizontalPosition?: "left" | "right" | "auto";
 }
 interface ValueXY {
     x: number;
@@ -119,8 +121,9 @@ interface CopilotOptions {
     stopOnOutsideClick?: boolean;
     backdropColor?: string;
     style?: {
-        [K in keyof typeof styles]?: Partial<(typeof styles)[K]>;
+        [K in keyof typeof styles]?: Partial<ViewStyle>;
     };
+    horizontalPosition?: Step["horizontalPosition"];
 }
 
 declare function walkthroughable<P = any>(WrappedComponent: React__default.ComponentType<P>): React__default.FunctionComponent<P>;
@@ -132,13 +135,15 @@ interface Props {
     children: React__default.ReactElement<any>;
     active?: boolean;
     edge?: {
-        top?: number;
-        left?: number;
-        right?: number;
-        bottom?: number;
+        x?: number;
+        y?: number;
+        extraWidth?: number;
+        extraHeight?: number;
     };
+    horizontalPosition?: "left" | "right" | "auto";
+    tooltipStyle?: ViewStyle;
 }
-declare const CopilotStep: ({ name, order, text, children, active, edge, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
+declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, horizontalPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
 
 type Events = {
     start: undefined;

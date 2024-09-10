@@ -167,7 +167,11 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
         }
 
         const arrowPos = arrowPosition[currentStep?.name ?? ""] ?? "left";
-        if (horizontalPosition === "left") {
+        if (
+          (horizontalPosition === "left" &&
+            currentStep?.horizontalPosition === "auto") ||
+          currentStep?.horizontalPosition === "right"
+        ) {
           tooltip.right = Math.max(
             newMeasuredLayout.width - (rect.x + rect.width),
             0,
@@ -364,7 +368,12 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
           )}
           <Animated.View
             key="tooltip"
-            style={[styles.tooltip, tooltipStyles, tooltipStyle]}
+            style={[
+              styles.tooltip,
+              tooltipStyles,
+              tooltipStyle,
+              currentStep?.style,
+            ]}
           >
             <TooltipComponent labels={labels} />
           </Animated.View>

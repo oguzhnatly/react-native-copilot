@@ -70,6 +70,11 @@ export interface CopilotOptions {
   tooltipComponent?: React.ComponentType<TooltipProps>;
   tooltipStyle?: ViewStyle;
   stepNumberComponent?: React.ComponentType<any >;
+  arrowConfiguration?: {
+    arrowSize?: 'large' | 'small';
+    color?: string;
+    position?: 'center' | 'left' | 'right';
+  };
   animated?: boolean;
   labels?: Labels;
   androidStatusBarVisible?: boolean;

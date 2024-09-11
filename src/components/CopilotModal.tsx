@@ -364,7 +364,10 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
           </Animated.View>
 
           {!!arrowSize && (
-            <Animated.View key="arrow" style={[styles.arrow, arrowStyles]} />
+            <Animated.View
+              key="arrow"
+              style={[styles.arrow, arrowStyles, currentStep?.arrowStyle]}
+            />
           )}
           <Animated.View
             key="tooltip"

@@ -16,6 +16,7 @@ export interface Step {
   measure: () => Promise<LayoutRectangle>;
   text: string;
   style?: ViewStyle;
+  arrowStyle?: ViewStyle;
   horizontalPosition?: "left" | "right" | "auto";
 }
 

@@ -758,7 +758,13 @@ var CopilotModal = forwardRef(
           ]
         },
         /* @__PURE__ */ React5.createElement(StepNumberComponent, null)
-      ), !!arrowSize && /* @__PURE__ */ React5.createElement(Animated3.View, { key: "arrow", style: [styles.arrow, arrowStyles] }), /* @__PURE__ */ React5.createElement(
+      ), !!arrowSize && /* @__PURE__ */ React5.createElement(
+        Animated3.View,
+        {
+          key: "arrow",
+          style: [styles.arrow, arrowStyles, currentStep == null ? void 0 : currentStep.arrowStyle]
+        }
+      ), /* @__PURE__ */ React5.createElement(
         Animated3.View,
         {
           key: "tooltip",
@@ -1103,6 +1109,7 @@ var CopilotStep = ({
   active = true,
   edge = {},
   tooltipStyle = {},
+  arrowStyle = {},
   horizontalPosition = "auto"
 }) => {
   var _a, _b, _c, _d;
@@ -1147,6 +1154,7 @@ var CopilotStep = ({
         wrapperRef,
         visible: true,
         style: tooltipStyle,
+        arrowStyle,
         horizontalPosition
       });
       registeredName.current = name;

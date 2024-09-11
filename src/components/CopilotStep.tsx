@@ -17,6 +17,7 @@ interface Props {
   };
   horizontalPosition?: "left" | "right" | "auto";
   tooltipStyle?: ViewStyle;
+  arrowStyle?: ViewStyle;
 }
 
 export const CopilotStep = ({
@@ -27,6 +28,7 @@ export const CopilotStep = ({
   active = true,
   edge = {},
   tooltipStyle = {},
+  arrowStyle = {},
   horizontalPosition = "auto",
 }: Props) => {
   const registeredName = useRef<string | null>(null);
@@ -79,6 +81,7 @@ export const CopilotStep = ({
         wrapperRef,
         visible: true,
         style: tooltipStyle,
+        arrowStyle,
         horizontalPosition,
       });
       registeredName.current = name;

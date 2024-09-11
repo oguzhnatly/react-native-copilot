@@ -86,6 +86,7 @@ interface Step {
     measure: () => Promise<LayoutRectangle>;
     text: string;
     style?: ViewStyle;
+    arrowStyle?: ViewStyle;
     horizontalPosition?: "left" | "right" | "auto";
 }
 interface ValueXY {
@@ -142,8 +143,9 @@ interface Props {
     };
     horizontalPosition?: "left" | "right" | "auto";
     tooltipStyle?: ViewStyle;
+    arrowStyle?: ViewStyle;
 }
-declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, horizontalPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
+declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, arrowStyle, horizontalPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
 
 type Events = {
     start: undefined;

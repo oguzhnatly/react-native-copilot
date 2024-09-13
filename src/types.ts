@@ -18,6 +18,7 @@ export interface Step {
   style?: ViewStyle;
   arrowStyle?: ViewStyle;
   horizontalPosition?: "left" | "right" | "auto";
+  verticalPosition?: "top" | "bottom" | "auto";
 }
 
 export interface CopilotContext {
@@ -67,6 +68,12 @@ export interface MaskProps {
   currentStep: Step;
 }
 
+interface TooltipAnimationValues {
+  delay: number;
+  duration: number;
+  easing: EasingFunction;
+}
+
 export interface CopilotOptions {
   easing?: ((value: number) => number) | undefined;
   overlay?: "svg" | "view";
@@ -87,4 +94,8 @@ export interface CopilotOptions {
   backdropColor?: string;
   style?: { [K in keyof typeof styles]?: Partial<ViewStyle> };
   horizontalPosition?: Step["horizontalPosition"];
+  tooltipAnimationValues?: {
+    fadeIn: TooltipAnimationValues;
+    fadeOut: TooltipAnimationValues;
+  };
 }

@@ -16,6 +16,7 @@ interface Props {
     extraHeight?: number;
   };
   horizontalPosition?: "left" | "right" | "auto";
+  verticalPosition?: "top" | "bottom" | "auto";
   tooltipStyle?: ViewStyle;
   arrowStyle?: ViewStyle;
 }
@@ -30,6 +31,7 @@ export const CopilotStep = ({
   tooltipStyle = {},
   arrowStyle = {},
   horizontalPosition = "auto",
+  verticalPosition = "auto",
 }: Props) => {
   const registeredName = useRef<string | null>(null);
   const { registerStep, unregisterStep } = useCopilot();
@@ -83,6 +85,7 @@ export const CopilotStep = ({
         style: tooltipStyle,
         arrowStyle,
         horizontalPosition,
+        verticalPosition,
       });
       registeredName.current = name;
     }

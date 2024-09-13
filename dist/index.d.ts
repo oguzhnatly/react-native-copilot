@@ -88,6 +88,7 @@ interface Step {
     style?: ViewStyle;
     arrowStyle?: ViewStyle;
     horizontalPosition?: "left" | "right" | "auto";
+    verticalPosition?: "top" | "bottom" | "auto";
 }
 interface ValueXY {
     x: number;
@@ -99,9 +100,15 @@ type SvgMaskPathFunction = (args: {
     canvasSize: ValueXY;
     step: Step;
 }) => string;
+type EasingFunction = (value: number) => number;
 type Labels = Partial<Record<"skip" | "previous" | "next" | "finish", string>>;
 interface TooltipProps {
     labels: Labels;
+}
+interface TooltipAnimationValues {
+    delay: number;
+    duration: number;
+    easing: EasingFunction;
 }
 interface CopilotOptions {
     easing?: ((value: number) => number) | undefined;
@@ -125,6 +132,10 @@ interface CopilotOptions {
         [K in keyof typeof styles]?: Partial<ViewStyle>;
     };
     horizontalPosition?: Step["horizontalPosition"];
+    tooltipAnimationValues?: {
+        fadeIn: TooltipAnimationValues;
+        fadeOut: TooltipAnimationValues;
+    };
 }
 
 declare function walkthroughable<P = any>(WrappedComponent: React__default.ComponentType<P>): React__default.FunctionComponent<P>;
@@ -142,10 +153,11 @@ interface Props {
         extraHeight?: number;
     };
     horizontalPosition?: "left" | "right" | "auto";
+    verticalPosition?: "top" | "bottom" | "auto";
     tooltipStyle?: ViewStyle;
     arrowStyle?: ViewStyle;
 }
-declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, arrowStyle, horizontalPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
+declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, arrowStyle, horizontalPosition, verticalPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
 
 type Events = {
     start: undefined;

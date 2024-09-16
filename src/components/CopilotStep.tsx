@@ -19,6 +19,8 @@ interface Props {
   verticalPosition?: "top" | "bottom" | "auto";
   tooltipStyle?: ViewStyle;
   arrowStyle?: ViewStyle;
+  backdropBorderRadius?: number;
+  arrowPosition?: "left" | "center" | "right";
 }
 
 export const CopilotStep = ({
@@ -32,6 +34,8 @@ export const CopilotStep = ({
   arrowStyle = {},
   horizontalPosition = "auto",
   verticalPosition = "auto",
+  backdropBorderRadius = 0,
+  arrowPosition = "left",
 }: Props) => {
   const registeredName = useRef<string | null>(null);
   const { registerStep, unregisterStep } = useCopilot();
@@ -86,6 +90,8 @@ export const CopilotStep = ({
         arrowStyle,
         horizontalPosition,
         verticalPosition,
+        backdropBorderRadius,
+        arrowPosition,
       });
       registeredName.current = name;
     }

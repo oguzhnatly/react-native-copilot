@@ -17,15 +17,24 @@ const defaultSvgPath: SvgMaskPathFunction = ({
   size,
   position,
   canvasSize,
+  radius,
 }): string => {
   const positionX = (position.x as any)._value as number;
   const positionY = (position.y as any)._value as number;
   const sizeX = (size.x as any)._value as number;
   const sizeY = (size.y as any)._value as number;
+  const radiusValue = (radius as any)._value as number;
 
-  return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${positionX},${positionY}H${
-    positionX + sizeX
-  }V${positionY + sizeY}H${positionX}V${positionY}Z`;
+  const minSize = Math.min(sizeX, sizeY);
+  const _radius = Math.max(Math.min(minSize / 2, radiusValue), 0);
+  const lx = sizeX - _radius * 2;
+  const ly = sizeY - _radius * 2;
+
+  return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0Z\
+M${positionX + sizeX - lx - _radius},${positionY} h${lx} a${_radius},${_radius} 0 0 1 ${_radius},${_radius}\
+v${ly} a${_radius},${_radius} 0 0 1 -${_radius},${_radius}\
+h-${lx} a${_radius},${_radius} 0 0 1 -${_radius},-${_radius}\
+v-${ly} a${_radius},${_radius} 0 0 1 ${_radius},-${_radius} z`;
 };
 
 export const SvgMask = ({
@@ -45,10 +54,13 @@ export const SvgMask = ({
     y: windowDimensions.height,
   });
   const sizeValue = useRef<Animated.ValueXY>(
-    new Animated.ValueXY(size)
+    new Animated.ValueXY(size),
   ).current;
   const positionValue = useRef<Animated.ValueXY>(
-    new Animated.ValueXY(position)
+    new Animated.ValueXY(position),
+  ).current;
+  const radiusValue = useRef<Animated.Value>(
+    new Animated.Value(currentStep.backdropBorderRadius ?? 0),
   ).current;
   const maskRef = useRef<any>(null);
 
@@ -57,16 +69,28 @@ export const SvgMask = ({
       size: sizeValue,
       position: positionValue,
       canvasSize,
+      radius: radiusValue,
       step: currentStep,
     });
 
     if (maskRef.current) {
       maskRef.current.setNativeProps({ d });
     }
-  }, [canvasSize, currentStep, svgMaskPath, positionValue, sizeValue]);
+  }, [
+    canvasSize,
+    currentStep,
+    svgMaskPath,
+    positionValue,
+    sizeValue,
+    radiusValue,
+  ]);
 
   const animate = useCallback(
-    (toSize: ValueXY = size, toPosition: ValueXY = position) => {
+    (
+      toSize: ValueXY = size,
+      toPosition: ValueXY = position,
+      toRadius: number = currentStep.backdropBorderRadius ?? 0,
+    ) => {
       if (animated) {
         Animated.parallel([
           Animated.timing(sizeValue, {
@@ -77,6 +101,12 @@ export const SvgMask = ({
           }),
           Animated.timing(positionValue, {
             toValue: toPosition,
+            duration: animationDuration,
+            easing,
+            useNativeDriver: false,
+          }),
+          Animated.timing(radiusValue, {
+            toValue: toRadius,
             duration: animationDuration,
             easing,
             useNativeDriver: false,
@@ -95,7 +125,9 @@ export const SvgMask = ({
       position,
       size,
       sizeValue,
-    ]
+      radiusValue,
+      currentStep,
+    ],
   );
 
   useEffect(() => {
@@ -106,10 +138,10 @@ export const SvgMask = ({
   }, [animationListener, positionValue]);
 
   useEffect(() => {
-    if (size && position) {
-      animate(size, position);
+    if (size && position && currentStep.backdropBorderRadius) {
+      animate(size, position, currentStep.backdropBorderRadius);
     }
-  }, [animate, position, size]);
+  }, [animate, position, size, currentStep]);
 
   const handleLayout = ({
     nativeEvent: {
@@ -139,6 +171,7 @@ export const SvgMask = ({
               size: sizeValue,
               position: positionValue,
               canvasSize,
+              radius: radiusValue,
               step: currentStep,
             })}
           />

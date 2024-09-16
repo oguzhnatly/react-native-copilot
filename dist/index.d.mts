@@ -1,4 +1,4 @@
-import { ViewStyle, NativeMethods, LayoutRectangle, Animated, ScrollView } from 'react-native';
+import { NativeMethods, LayoutRectangle, ViewStyle, Animated, ScrollView } from 'react-native';
 import * as React$1 from 'react';
 import React__default, { PropsWithChildren } from 'react';
 import { Emitter } from 'mitt';
@@ -89,6 +89,8 @@ interface Step {
     arrowStyle?: ViewStyle;
     horizontalPosition?: "left" | "right" | "auto";
     verticalPosition?: "top" | "bottom" | "auto";
+    backdropBorderRadius: number;
+    arrowPosition: "left" | "center" | "right";
 }
 interface ValueXY {
     x: number;
@@ -98,7 +100,8 @@ type SvgMaskPathFunction = (args: {
     size: Animated.ValueXY;
     position: Animated.ValueXY;
     canvasSize: ValueXY;
-    step: Step;
+    radius: Animated.Value;
+    step?: Step;
 }) => string;
 type EasingFunction = (value: number) => number;
 type Labels = Partial<Record<"skip" | "previous" | "next" | "finish", string>>;
@@ -124,7 +127,6 @@ interface CopilotOptions {
     verticalOffset?: number;
     arrowColor?: string;
     arrowSize?: number;
-    arrowPosition?: Record<string, "center" | "left" | "right">;
     margin?: number;
     stopOnOutsideClick?: boolean;
     backdropColor?: string;
@@ -136,6 +138,8 @@ interface CopilotOptions {
         fadeIn: TooltipAnimationValues;
         fadeOut: TooltipAnimationValues;
     };
+    delayBetweenSteps?: number;
+    onStepChangeEvent?: () => void;
 }
 
 declare function walkthroughable<P = any>(WrappedComponent: React__default.ComponentType<P>): React__default.FunctionComponent<P>;
@@ -156,8 +160,10 @@ interface Props {
     verticalPosition?: "top" | "bottom" | "auto";
     tooltipStyle?: ViewStyle;
     arrowStyle?: ViewStyle;
+    backdropBorderRadius?: number;
+    arrowPosition?: "left" | "center" | "right";
 }
-declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, arrowStyle, horizontalPosition, verticalPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
+declare const CopilotStep: ({ name, order, text, children, active, edge, tooltipStyle, arrowStyle, horizontalPosition, verticalPosition, backdropBorderRadius, arrowPosition, }: Props) => React__default.ReactElement<any, string | React__default.JSXElementConstructor<any>>;
 
 type Events = {
     start: undefined;
@@ -179,6 +185,7 @@ interface CopilotContextType {
     isLastStep: boolean;
     currentStepNumber: number;
     totalStepsNumber: number;
+    delayBetweenSteps?: number;
 }
 declare const CopilotProvider: ({ verticalOffset, children, style, ...rest }: PropsWithChildren<CopilotOptions>) => React__default.JSX.Element;
 declare const useCopilot: () => CopilotContextType;
@@ -188,4 +195,4 @@ declare const DefaultUI: {
     Tooltip: ({ labels }: TooltipProps) => React$1.JSX.Element;
 };
 
-export { type CopilotOptions as CopilotProps, CopilotProvider, CopilotStep, DefaultUI, type TooltipProps, useCopilot, walkthroughable };
+export { type CopilotOptions as CopilotProps, CopilotProvider, CopilotStep, DefaultUI, type Step, type TooltipProps, useCopilot, walkthroughable };

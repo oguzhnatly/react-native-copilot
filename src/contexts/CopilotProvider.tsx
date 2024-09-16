@@ -43,6 +43,7 @@ interface CopilotContextType {
   isLastStep: boolean;
   currentStepNumber: number;
   totalStepsNumber: number;
+  delayBetweenSteps?: number;
 }
 
 /*
@@ -105,7 +106,6 @@ export const CopilotProvider = ({
   const setCurrentStep = useCallback(
     async (step?: Step, move: boolean = true) => {
       setCurrentStepState(step);
-      copilotEvents.emit("stepChange", step);
 
       if (scrollView != null) {
         const nodeHandle = findNodeHandle(scrollView);
@@ -129,7 +129,7 @@ export const CopilotProvider = ({
         scrollView != null ? 100 : 0,
       );
     },
-    [copilotEvents, moveModalToStep, scrollView, setCurrentStepState],
+    [moveModalToStep, scrollView, setCurrentStepState],
   );
 
   const start = useCallback(
@@ -224,10 +224,18 @@ export const CopilotProvider = ({
     ],
   );
 
+  const onStepChangeEvent = useCallback(() => {
+    copilotEvents.emit("stepChange", value.currentStep);
+  }, [copilotEvents, value]);
+
   return (
     <CopilotContext.Provider value={value}>
       <>
-        <CopilotModal ref={modal} {...rest} />
+        <CopilotModal
+          ref={modal}
+          {...rest}
+          onStepChangeEvent={onStepChangeEvent}
+        />
         {children}
       </>
     </CopilotContext.Provider>

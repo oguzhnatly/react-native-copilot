@@ -19,6 +19,8 @@ export interface Step {
   arrowStyle?: ViewStyle;
   horizontalPosition?: "left" | "right" | "auto";
   verticalPosition?: "top" | "bottom" | "auto";
+  backdropBorderRadius: number;
+  arrowPosition: "left" | "center" | "right";
 }
 
 export interface CopilotContext {
@@ -36,7 +38,8 @@ export type SvgMaskPathFunction = (args: {
   size: Animated.ValueXY;
   position: Animated.ValueXY;
   canvasSize: ValueXY;
-  step: Step;
+  radius: Animated.Value;
+  step?: Step;
 }) => string;
 
 export type StepsMap = Record<string, Step>;
@@ -66,6 +69,7 @@ export interface MaskProps {
   };
   onClick?: () => any;
   currentStep: Step;
+  radius: number;
 }
 
 interface TooltipAnimationValues {
@@ -88,7 +92,6 @@ export interface CopilotOptions {
   verticalOffset?: number;
   arrowColor?: string;
   arrowSize?: number;
-  arrowPosition?: Record<string, "center" | "left" | "right">;
   margin?: number;
   stopOnOutsideClick?: boolean;
   backdropColor?: string;
@@ -98,4 +101,6 @@ export interface CopilotOptions {
     fadeIn: TooltipAnimationValues;
     fadeOut: TooltipAnimationValues;
   };
+  delayBetweenSteps?: number;
+  onStepChangeEvent?: () => void;
 }

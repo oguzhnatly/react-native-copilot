@@ -187,13 +187,19 @@ var init_SvgMask = __esm({
     defaultSvgPath = ({
       size,
       position,
-      canvasSize
+      canvasSize,
+      radius
     }) => {
       const positionX = position.x._value;
       const positionY = position.y._value;
       const sizeX = size.x._value;
       const sizeY = size.y._value;
-      return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${positionX},${positionY}H${positionX + sizeX}V${positionY + sizeY}H${positionX}V${positionY}Z`;
+      const radiusValue = radius._value;
+      const minSize = Math.min(sizeX, sizeY);
+      const _radius = Math.max(Math.min(minSize / 2, radiusValue), 0);
+      const lx = sizeX - _radius * 2;
+      const ly = sizeY - _radius * 2;
+      return `M0,0H${canvasSize.x}V${canvasSize.y}H0V0ZM${positionX + sizeX - lx - _radius},${positionY} h${lx} a${_radius},${_radius} 0 0 1 ${_radius},${_radius}v${ly} a${_radius},${_radius} 0 0 1 -${_radius},${_radius}h-${lx} a${_radius},${_radius} 0 0 1 -${_radius},-${_radius}v-${ly} a${_radius},${_radius} 0 0 1 ${_radius},-${_radius} z`;
     };
     SvgMask = ({
       size,
@@ -207,6 +213,7 @@ var init_SvgMask = __esm({
       onClick,
       currentStep
     }) => {
+      var _a;
       const [canvasSize, setCanvasSize] = useState({
         x: windowDimensions.width,
         y: windowDimensions.height
@@ -217,20 +224,31 @@ var init_SvgMask = __esm({
       const positionValue = useRef(
         new Animated.ValueXY(position)
       ).current;
+      const radiusValue = useRef(
+        new Animated.Value((_a = currentStep.backdropBorderRadius) != null ? _a : 0)
+      ).current;
       const maskRef = useRef(null);
       const animationListener = useCallback(() => {
         const d = svgMaskPath({
           size: sizeValue,
           position: positionValue,
           canvasSize,
+          radius: radiusValue,
           step: currentStep
         });
         if (maskRef.current) {
           maskRef.current.setNativeProps({ d });
         }
-      }, [canvasSize, currentStep, svgMaskPath, positionValue, sizeValue]);
+      }, [
+        canvasSize,
+        currentStep,
+        svgMaskPath,
+        positionValue,
+        sizeValue,
+        radiusValue
+      ]);
       const animate = useCallback(
-        (toSize = size, toPosition = position) => {
+        (toSize = size, toPosition = position, toRadius = ((_b) => (_b = currentStep.backdropBorderRadius) != null ? _b : 0)()) => {
           if (animated) {
             Animated.parallel([
               Animated.timing(sizeValue, {
@@ -241,6 +259,12 @@ var init_SvgMask = __esm({
               }),
               Animated.timing(positionValue, {
                 toValue: toPosition,
+                duration: animationDuration,
+                easing,
+                useNativeDriver: false
+              }),
+              Animated.timing(radiusValue, {
+                toValue: toRadius,
                 duration: animationDuration,
                 easing,
                 useNativeDriver: false
@@ -258,7 +282,9 @@ var init_SvgMask = __esm({
           positionValue,
           position,
           size,
-          sizeValue
+          sizeValue,
+          radiusValue,
+          currentStep
         ]
       );
       useEffect(() => {
@@ -268,10 +294,10 @@ var init_SvgMask = __esm({
         };
       }, [animationListener, positionValue]);
       useEffect(() => {
-        if (size && position) {
-          animate(size, position);
+        if (size && position && currentStep.backdropBorderRadius) {
+          animate(size, position, currentStep.backdropBorderRadius);
         }
-      }, [animate, position, size]);
+      }, [animate, position, size, currentStep]);
       const handleLayout = ({
         nativeEvent: {
           layout: { width, height }
@@ -300,6 +326,7 @@ var init_SvgMask = __esm({
               size: sizeValue,
               position: positionValue,
               canvasSize,
+              radius: radiusValue,
               step: currentStep
             })
           }
@@ -509,7 +536,6 @@ var CopilotModal = forwardRef(
     stopOnOutsideClick = false,
     arrowColor = "#fff",
     arrowSize = ARROW_SIZE,
-    arrowPosition = {},
     margin = MARGIN,
     tooltipAnimationValues = {
       fadeIn: {
@@ -522,24 +548,42 @@ var CopilotModal = forwardRef(
         duration: 300,
         easing: Easing2.ease
       }
-    }
+    },
+    delayBetweenSteps = 400,
+    onStepChangeEvent
   }, ref) {
-    const { stop, currentStep, visible } = useCopilot();
-    const [tooltipStyles, setTooltipStyles] = useState3({});
-    const [arrowStyles, setArrowStyles] = useState3({});
+    const {
+      stop,
+      visible,
+      isFirstStep,
+      copilotEvents,
+      currentStep: _currentStep
+    } = useCopilot();
+    const [currentStep, setCurrentStep] = useState3(void 0);
+    useEffect3(() => {
+      if (!currentStep) {
+        setCurrentStep(_currentStep);
+      }
+    }, [_currentStep]);
+    useEffect3(() => {
+      copilotEvents.on("stepChange", (step) => {
+        setCurrentStep(step);
+      });
+    }, [copilotEvents]);
+    const [_styles, setStyles] = useState3({
+      arrow: {},
+      tooltip: {},
+      layout: void 0
+    });
     const [animatedValues] = useState3({
       top: new Animated3.Value(0),
-      stepNumberLeft: new Animated3.Value(0)
+      stepNumberLeft: new Animated3.Value(0),
+      tooltipOpacity: new Animated3.Value(0)
     });
     const layoutRef = useRef3(makeDefaultLayout());
-    const [layout, setLayout] = useState3(
-      void 0
-    );
-    const [maskRect, setMaskRect] = useState3();
-    const [isAnimated, setIsAnimated] = useState3(false);
+    const maskRect = useRef3(void 0);
     const [containerVisible, setContainerVisible] = useState3(false);
-    const [tooltipOpacity] = useState3(new Animated3.Value(0));
-    const [tooltipAnimation, setTooltipAnimation] = useState3(null);
+    const firstInit = useRef3(false);
     useEffect3(() => {
       if (visible) {
         setContainerVisible(true);
@@ -569,132 +613,134 @@ var CopilotModal = forwardRef(
     });
     const _animateMove = useCallback3(
       (rect) => __async(this, null, function* () {
-        const newMeasuredLayout = yield measure();
-        setTimeout(() => {
-          setLayout(newMeasuredLayout);
-          setMaskRect({
-            width: rect.width,
-            height: rect.height,
-            x: Math.floor(Math.max(rect.x, 0)),
-            y: Math.floor(Math.max(rect.y, 0))
-          });
-        }, tooltipAnimationValues.fadeOut.duration / 3);
-        const fadeOutAnimation = Animated3.timing(tooltipOpacity, __spreadProps(__spreadValues({
-          toValue: 0
-        }, tooltipAnimationValues.fadeOut), {
-          useNativeDriver: true
-        }));
-        fadeOutAnimation.start(({ finished }) => {
-          var _a, _b, _c;
-          if (!finished) {
-            return;
-          }
-          if (!androidStatusBarVisible && Platform.OS === "android") {
-            rect.y -= (_a = StatusBar.currentHeight) != null ? _a : 0;
-          }
-          let stepNumberLeft = rect.x - STEP_NUMBER_RADIUS;
-          if (stepNumberLeft < 0) {
-            stepNumberLeft = rect.x + rect.width - STEP_NUMBER_RADIUS;
-            if (stepNumberLeft > newMeasuredLayout.width - STEP_NUMBER_DIAMETER) {
-              stepNumberLeft = newMeasuredLayout.width - STEP_NUMBER_DIAMETER;
-            }
-          }
-          const center = {
-            x: rect.x + rect.width / 2,
-            y: rect.y + rect.height / 2
-          };
-          const relativeToLeft = center.x;
-          const relativeToTop = center.y;
-          const relativeToBottom = Math.abs(
-            center.y - newMeasuredLayout.height
-          );
-          const relativeToRight = Math.abs(center.x - newMeasuredLayout.width);
-          const verticalPosition = relativeToBottom > relativeToTop ? "bottom" : "top";
-          const horizontalPosition = relativeToLeft > relativeToRight ? "left" : "right";
-          const tooltip = {};
-          const arrow = {};
-          if ((currentStep == null ? void 0 : currentStep.verticalPosition) !== "top" && verticalPosition === "bottom" || (currentStep == null ? void 0 : currentStep.verticalPosition) === "bottom") {
-            tooltip.top = rect.y + rect.height + margin;
-            arrow.borderBottomColor = arrowColor;
-            arrow.top = tooltip.top - arrowSize * 2;
+        var _a, _b;
+        const fadeOutAnimation = Animated3.timing(
+          animatedValues.tooltipOpacity,
+          __spreadProps(__spreadValues({
+            toValue: 0
+          }, tooltipAnimationValues.fadeOut), {
+            useNativeDriver: false
+          })
+        );
+        yield new Promise((resolve) => {
+          if (!firstInit.current && isFirstStep) {
+            firstInit.current = true;
+            resolve(null);
           } else {
-            tooltip.bottom = newMeasuredLayout.height - (rect.y - margin);
-            arrow.borderTopColor = arrowColor;
-            arrow.bottom = tooltip.bottom - ARROW_SIZE * 2;
-          }
-          const arrowPos = (_c = arrowPosition[(_b = currentStep == null ? void 0 : currentStep.name) != null ? _b : ""]) != null ? _c : "left";
-          if (horizontalPosition === "left" && (currentStep == null ? void 0 : currentStep.horizontalPosition) === "auto" || (currentStep == null ? void 0 : currentStep.horizontalPosition) === "right") {
-            tooltip.right = Math.max(
-              newMeasuredLayout.width - (rect.x + rect.width),
-              0
-            );
-            tooltip.right = tooltip.right === 0 ? tooltip.right + margin : tooltip.right;
-            tooltip.maxWidth = newMeasuredLayout.width - tooltip.right - margin;
-            if (arrowPos === "center") {
-              arrow.right = Math.round(tooltip.maxWidth / 2) - margin * 0.75;
-            } else {
-              arrow.right = tooltip.right + margin;
-            }
-          } else {
-            tooltip.left = Math.max(rect.x, 0);
-            tooltip.left = tooltip.left === 0 ? tooltip.left + margin : tooltip.left;
-            tooltip.maxWidth = newMeasuredLayout.width - tooltip.left - margin;
-            if (arrowPos === "center") {
-              arrow.left = Math.round(tooltip.maxWidth / 2) + margin * 0.75;
-            } else {
-              arrow.left = tooltip.left + margin;
-            }
-          }
-          sanitize(arrow);
-          sanitize(tooltip);
-          sanitize(rect);
-          const animate = [
-            ["top", rect.y],
-            ["stepNumberLeft", stepNumberLeft]
-          ];
-          if (!isAnimated) {
-            animate.forEach(([key, value]) => {
-              animatedValues[key].setValue(value);
+            fadeOutAnimation.start(({ finished }) => {
+              if (finished) {
+                setTimeout(() => {
+                  resolve(null);
+                }, delayBetweenSteps);
+              }
             });
           }
-          tooltipAnimation == null ? void 0 : tooltipAnimation.stop();
-          const newTooltipAnimation = Animated3.sequence([
-            ...isAnimated ? animate.map(([key, value]) => {
-              return Animated3.timing(animatedValues[key], {
-                toValue: value,
-                duration: animationDuration,
-                easing,
-                useNativeDriver: false
-              });
-            }) : [],
-            Animated3.timing(tooltipOpacity, __spreadProps(__spreadValues({
+        });
+        maskRect.current = {
+          width: rect.width,
+          height: rect.height,
+          x: Math.floor(Math.max(rect.x, 0)),
+          y: Math.floor(Math.max(rect.y, 0))
+        };
+        const newMeasuredLayout = yield measure();
+        onStepChangeEvent == null ? void 0 : onStepChangeEvent();
+        if (!androidStatusBarVisible && Platform.OS === "android") {
+          rect.y -= (_a = StatusBar.currentHeight) != null ? _a : 0;
+        }
+        let stepNumberLeft = rect.x - STEP_NUMBER_RADIUS;
+        if (stepNumberLeft < 0) {
+          stepNumberLeft = rect.x + rect.width - STEP_NUMBER_RADIUS;
+          if (stepNumberLeft > newMeasuredLayout.width - STEP_NUMBER_DIAMETER) {
+            stepNumberLeft = newMeasuredLayout.width - STEP_NUMBER_DIAMETER;
+          }
+        }
+        const center = {
+          x: rect.x + rect.width / 2,
+          y: rect.y + rect.height / 2
+        };
+        const relativeToLeft = center.x;
+        const relativeToTop = center.y;
+        const relativeToBottom = Math.abs(center.y - newMeasuredLayout.height);
+        const relativeToRight = Math.abs(center.x - newMeasuredLayout.width);
+        const verticalPosition = relativeToBottom > relativeToTop ? "bottom" : "top";
+        const horizontalPosition = relativeToLeft > relativeToRight ? "left" : "right";
+        const tooltip = {};
+        const arrow = {};
+        if ((_currentStep == null ? void 0 : _currentStep.verticalPosition) !== "top" && verticalPosition === "bottom" || (_currentStep == null ? void 0 : _currentStep.verticalPosition) === "bottom") {
+          tooltip.top = rect.y + rect.height + margin;
+          arrow.borderBottomColor = arrowColor;
+          arrow.top = tooltip.top - arrowSize * 2;
+        } else {
+          tooltip.bottom = newMeasuredLayout.height - (rect.y - margin);
+          arrow.borderTopColor = arrowColor;
+          arrow.bottom = tooltip.bottom - ARROW_SIZE * 2;
+        }
+        const arrowPos = (_b = _currentStep == null ? void 0 : _currentStep.arrowPosition) != null ? _b : "left";
+        if (horizontalPosition === "left" && (_currentStep == null ? void 0 : _currentStep.horizontalPosition) === "auto" || (_currentStep == null ? void 0 : _currentStep.horizontalPosition) === "right") {
+          tooltip.right = Math.max(
+            newMeasuredLayout.width - (rect.x + rect.width),
+            0
+          );
+          tooltip.right = tooltip.right === 0 ? tooltip.right + margin : tooltip.right;
+          tooltip.maxWidth = newMeasuredLayout.width - tooltip.right - margin;
+          if (arrowPos === "center") {
+            arrow.right = Math.round(tooltip.maxWidth / 2) - margin * 0.75;
+          } else {
+            arrow.right = tooltip.right + margin;
+          }
+        } else {
+          tooltip.left = Math.max(rect.x, 0);
+          tooltip.left = tooltip.left === 0 ? tooltip.left + margin : tooltip.left;
+          tooltip.maxWidth = newMeasuredLayout.width - tooltip.left - margin;
+          if (arrowPos === "center") {
+            arrow.left = Math.round(tooltip.maxWidth / 2) + margin * 0.75;
+          } else {
+            arrow.left = tooltip.left + margin;
+          }
+        }
+        sanitize(rect);
+        sanitize(tooltip);
+        sanitize(arrow);
+        const animate = [
+          ["top", rect.y],
+          ["stepNumberLeft", stepNumberLeft]
+        ];
+        animate.forEach(([key, value]) => {
+          animatedValues[key].setValue(value);
+        });
+        setTimeout(() => {
+          setStyles({
+            arrow,
+            tooltip,
+            layout: newMeasuredLayout
+          });
+        }, tooltipAnimationValues.fadeIn.delay);
+        if (!animated) {
+          animatedValues.tooltipOpacity.setValue(1);
+        } else {
+          const newTooltipAnimation = Animated3.timing(
+            animatedValues.tooltipOpacity,
+            __spreadProps(__spreadValues({
               toValue: 1
             }, tooltipAnimationValues.fadeIn), {
-              useNativeDriver: true
-            }))
-          ]);
-          setTooltipAnimation(newTooltipAnimation);
+              useNativeDriver: false
+            })
+          );
           newTooltipAnimation.start();
-          setTimeout(() => {
-            setTooltipStyles(tooltip);
-            setArrowStyles(arrow);
-          }, tooltipAnimationValues.fadeIn.duration / 2.25);
-        });
+        }
       }),
       [
         androidStatusBarVisible,
         animatedValues,
-        animationDuration,
         arrowColor,
-        easing,
-        isAnimated,
+        animated,
         arrowSize,
         margin,
-        arrowPosition,
-        currentStep,
-        tooltipOpacity,
+        _currentStep,
         tooltipAnimationValues,
-        tooltipAnimation
+        isFirstStep,
+        delayBetweenSteps,
+        onStepChangeEvent
       ]
     );
     const animateMove = useCallback3(
@@ -713,9 +759,12 @@ var CopilotModal = forwardRef(
       [_animateMove]
     );
     const reset = () => {
-      setIsAnimated(false);
       setContainerVisible(false);
-      setLayout(void 0);
+      setStyles({
+        arrow: {},
+        tooltip: {},
+        layout: void 0
+      });
     };
     const handleStop = () => {
       reset();
@@ -736,22 +785,9 @@ var CopilotModal = forwardRef(
       [animateMove]
     );
     const modalVisible = containerVisible || visible;
-    const contentVisible = layout != null && containerVisible;
-    if (!modalVisible) {
-      return null;
-    }
-    return /* @__PURE__ */ React5.createElement(
-      Modal,
-      {
-        animationType: "none",
-        visible: true,
-        onRequestClose: noop,
-        transparent: true,
-        supportedOrientations: ["portrait", "landscape"]
-      },
-      /* @__PURE__ */ React5.createElement(View5, { style: styles.container, onLayout: handleLayoutChange }, contentVisible && renderMask(), contentVisible && renderTooltip())
-    );
-    function renderMask() {
+    const contentVisible = _styles.layout !== void 0 && containerVisible;
+    const renderMask = () => {
+      var _a, _b;
       const MaskComponent = overlay === "svg" ? (
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         (init_SvgMask(), __toCommonJS(SvgMask_exports)).SvgMask
@@ -759,16 +795,16 @@ var CopilotModal = forwardRef(
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         (init_ViewMask(), __toCommonJS(ViewMask_exports)).ViewMask
       );
-      const size = maskRect && {
-        x: maskRect.width,
-        y: maskRect.height
+      const size = maskRect.current && {
+        x: (_a = maskRect.current) == null ? void 0 : _a.width,
+        y: (_b = maskRect.current) == null ? void 0 : _b.height
       };
-      const position = maskRect;
+      const position = maskRect.current;
       return /* @__PURE__ */ React5.createElement(
         MaskComponent,
         {
           animated,
-          layout,
+          layout: _styles.layout,
           style: styles.overlayContainer,
           size,
           position,
@@ -780,8 +816,8 @@ var CopilotModal = forwardRef(
           currentStep
         }
       );
-    }
-    function renderTooltip() {
+    };
+    const renderTooltip = useCallback3(() => {
       if (!currentStep) {
         return null;
       }
@@ -798,25 +834,58 @@ var CopilotModal = forwardRef(
           ]
         },
         /* @__PURE__ */ React5.createElement(StepNumberComponent, null)
-      ), !!arrowSize && /* @__PURE__ */ React5.createElement(
+      ), /* @__PURE__ */ React5.createElement(
         Animated3.View,
         {
           key: "arrow",
-          style: __spreadProps(__spreadValues(__spreadValues(__spreadValues({}, styles.arrow), arrowStyles), currentStep == null ? void 0 : currentStep.arrowStyle), {
-            opacity: tooltipOpacity
-          })
+          style: [
+            styles.arrow,
+            _styles.arrow,
+            currentStep == null ? void 0 : currentStep.arrowStyle,
+            {
+              opacity: animatedValues.tooltipOpacity
+            }
+          ]
         }
       ), /* @__PURE__ */ React5.createElement(
         Animated3.View,
         {
           key: "tooltip",
-          style: __spreadProps(__spreadValues(__spreadValues(__spreadValues(__spreadValues({}, styles.tooltip), tooltipStyles), tooltipStyle), currentStep == null ? void 0 : currentStep.style), {
-            opacity: tooltipOpacity
-          })
+          style: [
+            styles.tooltip,
+            _styles.tooltip,
+            tooltipStyle,
+            currentStep == null ? void 0 : currentStep.style,
+            {
+              opacity: animatedValues.tooltipOpacity
+            }
+          ]
         },
         /* @__PURE__ */ React5.createElement(TooltipComponent, { labels })
       ));
+    }, [
+      currentStep,
+      _styles,
+      animatedValues,
+      labels,
+      tooltipStyle,
+      StepNumberComponent,
+      TooltipComponent
+    ]);
+    if (!modalVisible) {
+      return null;
     }
+    return /* @__PURE__ */ React5.createElement(
+      Modal,
+      {
+        animationType: "none",
+        visible: true,
+        onRequestClose: noop,
+        transparent: true,
+        supportedOrientations: ["portrait", "landscape"]
+      },
+      /* @__PURE__ */ React5.createElement(View5, { style: styles.container, onLayout: handleLayoutChange }, contentVisible && renderMask(), contentVisible && renderTooltip())
+    );
   }
 );
 var floorify = (obj) => {
@@ -1003,7 +1072,6 @@ var CopilotProvider = (_a) => {
     (step, move = true) => __async(void 0, null, function* () {
       var _a2;
       setCurrentStepState(step);
-      copilotEvents.emit("stepChange", step);
       if (scrollView != null) {
         const nodeHandle = findNodeHandle(scrollView);
         if (nodeHandle) {
@@ -1025,7 +1093,7 @@ var CopilotProvider = (_a) => {
         scrollView != null ? 100 : 0
       );
     }),
-    [copilotEvents, moveModalToStep, scrollView, setCurrentStepState]
+    [moveModalToStep, scrollView, setCurrentStepState]
   );
   const start = useCallback5(
     (fromStep, suppliedScrollView = null) => __async(void 0, null, function* () {
@@ -1110,7 +1178,17 @@ var CopilotProvider = (_a) => {
       totalStepsNumber
     ]
   );
-  return /* @__PURE__ */ React6.createElement(CopilotContext.Provider, { value }, /* @__PURE__ */ React6.createElement(React6.Fragment, null, /* @__PURE__ */ React6.createElement(CopilotModal, __spreadValues({ ref: modal }, rest)), children));
+  const onStepChangeEvent = useCallback5(() => {
+    copilotEvents.emit("stepChange", value.currentStep);
+  }, [copilotEvents, value]);
+  return /* @__PURE__ */ React6.createElement(CopilotContext.Provider, { value }, /* @__PURE__ */ React6.createElement(React6.Fragment, null, /* @__PURE__ */ React6.createElement(
+    CopilotModal,
+    __spreadProps(__spreadValues({
+      ref: modal
+    }, rest), {
+      onStepChangeEvent
+    })
+  ), children));
 };
 var useCopilot = () => {
   const value = useContext(CopilotContext);
@@ -1150,7 +1228,9 @@ var CopilotStep = ({
   tooltipStyle = {},
   arrowStyle = {},
   horizontalPosition = "auto",
-  verticalPosition = "auto"
+  verticalPosition = "auto",
+  backdropBorderRadius = 0,
+  arrowPosition = "left"
 }) => {
   var _a, _b, _c, _d;
   const registeredName = useRef6(null);
@@ -1196,7 +1276,9 @@ var CopilotStep = ({
         style: tooltipStyle,
         arrowStyle,
         horizontalPosition,
-        verticalPosition
+        verticalPosition,
+        backdropBorderRadius,
+        arrowPosition
       });
       registeredName.current = name;
     }

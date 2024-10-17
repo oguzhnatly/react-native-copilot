@@ -3,6 +3,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -14,7 +15,6 @@ import {
   type CopilotModalHandle,
 } from "../components/CopilotModal";
 import { OFFSET_WIDTH, RNCSetStyle } from "../components/style";
-import { useStateWithAwait } from "../hooks/useStateWithAwait";
 import { useStepsMap } from "../hooks/useStepsMap";
 import { type CopilotOptions, type Step } from "../types";
 
@@ -64,7 +64,9 @@ export const CopilotProvider = ({
   const copilotEvents = useRef(mitt<Events>()).current;
   const modal = useRef<CopilotModalHandle | null>(null);
 
-  const [visible, setVisibility] = useStateWithAwait(false);
+  const isStopping = useRef(false);
+
+  const [visible, setVisibility] = useState(false);
   const [scrollView, setScrollView] = useState<ScrollView | null>(null);
 
   RNCSetStyle(style);
@@ -169,8 +171,15 @@ export const CopilotProvider = ({
     ],
   );
 
+  useEffect(() => {
+    if (isStopping.current && !visible) {
+      isStopping.current = false;
+      copilotEvents.emit("stop");
+    }
+  }, [copilotEvents, visible]);
+
   const stop = useCallback(async () => {
-    await setVisibility(false);
+    setVisibility(false);
     copilotEvents.emit("stop");
   }, [copilotEvents, setVisibility]);
 

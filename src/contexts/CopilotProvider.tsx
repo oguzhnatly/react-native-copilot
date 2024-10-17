@@ -34,6 +34,7 @@ interface CopilotContextType {
     suppliedScrollView?: ScrollView | null,
   ) => Promise<void>;
   stop: () => Promise<void>;
+  forceStop: () => void;
   goToNext: () => Promise<void>;
   goToNth: (n: number) => Promise<void>;
   goToPrev: () => Promise<void>;
@@ -205,6 +206,9 @@ export const CopilotProvider = ({
       isLastStep,
       currentStepNumber,
       totalStepsNumber,
+      forceStop: () => {
+        modal.current?.handleStop();
+      },
     }),
     [
       registerStep,

@@ -176,6 +176,7 @@ interface CopilotContextType {
     currentStep: Step | undefined;
     start: (fromStep?: string, suppliedScrollView?: ScrollView | null) => Promise<void>;
     stop: () => Promise<void>;
+    forceStop: () => void;
     goToNext: () => Promise<void>;
     goToNth: (n: number) => Promise<void>;
     goToPrev: () => Promise<void>;

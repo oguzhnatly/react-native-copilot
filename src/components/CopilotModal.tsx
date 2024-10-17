@@ -43,6 +43,7 @@ const makeDefaultLayout = (): LayoutRectangle => ({
 
 export interface CopilotModalHandle {
   animateMove: (obj: LayoutRectangle) => Promise<void>;
+  handleStop: () => void;
 }
 
 export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
@@ -356,6 +357,8 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
       reset();
       void stop();
     };
+    const handleStopRef = useRef(handleStop);
+    handleStopRef.current = handleStop;
 
     const handleMaskClick = () => {
       if (stopOnOutsideClick) {
@@ -368,6 +371,9 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
       () => {
         return {
           animateMove,
+          handleStop: () => {
+            handleStopRef.current();
+          },
         };
       },
       [animateMove],

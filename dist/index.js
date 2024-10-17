@@ -762,6 +762,8 @@ var CopilotModal = (0, import_react5.forwardRef)(
       reset();
       void stop();
     };
+    const handleStopRef = (0, import_react5.useRef)(handleStop);
+    handleStopRef.current = handleStop;
     const handleMaskClick = () => {
       if (stopOnOutsideClick) {
         handleStop();
@@ -771,7 +773,10 @@ var CopilotModal = (0, import_react5.forwardRef)(
       ref,
       () => {
         return {
-          animateMove
+          animateMove,
+          handleStop: () => {
+            handleStopRef.current();
+          }
         };
       },
       [animateMove]
@@ -1151,7 +1156,11 @@ var CopilotProvider = (_a) => {
       isFirstStep,
       isLastStep,
       currentStepNumber,
-      totalStepsNumber
+      totalStepsNumber,
+      forceStop: () => {
+        var _a2;
+        (_a2 = modal.current) == null ? void 0 : _a2.handleStop();
+      }
     }),
     [
       registerStep,

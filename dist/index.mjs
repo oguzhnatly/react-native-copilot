@@ -785,7 +785,7 @@ var CopilotModal = forwardRef(
       },
       [animateMove]
     );
-    const modalVisible = containerVisible || visible;
+    const modalVisible = visible;
     const contentVisible = _styles.layout !== void 0 && containerVisible;
     const renderMask = () => {
       var _a, _b;

@@ -373,7 +373,7 @@ export const CopilotModal = forwardRef<CopilotModalHandle, Props>(
       [animateMove],
     );
 
-    const modalVisible = containerVisible || visible;
+    const modalVisible = visible;
     const contentVisible = _styles.layout !== undefined && containerVisible;
 
     const renderMask = () => {

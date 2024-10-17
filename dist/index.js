@@ -456,12 +456,12 @@ __export(src_exports, {
 module.exports = __toCommonJS(src_exports);
 
 // src/components/default-ui/StepNumber.tsx
-var import_react9 = __toESM(require("react"));
+var import_react8 = __toESM(require("react"));
 var import_react_native8 = require("react-native");
 
 // src/contexts/CopilotProvider.tsx
 var import_mitt = __toESM(require("mitt"));
-var import_react8 = __toESM(require("react"));
+var import_react7 = __toESM(require("react"));
 var import_react_native7 = require("react-native");
 
 // src/components/CopilotModal.tsx
@@ -902,36 +902,13 @@ var sanitize = (obj) => {
 // src/contexts/CopilotProvider.tsx
 init_style();
 
-// src/hooks/useStateWithAwait.ts
-var import_react6 = require("react");
-var useStateWithAwait = (initialState) => {
-  const endPending = (0, import_react6.useRef)(() => {
-  });
-  const newDesiredValue = (0, import_react6.useRef)(initialState);
-  const [state, setState] = (0, import_react6.useState)(initialState);
-  const setStateWithAwait = (newState) => __async(void 0, null, function* () {
-    const pending = new Promise((resolve) => {
-      endPending.current = resolve;
-    });
-    newDesiredValue.current = newState;
-    setState(newState);
-    yield pending;
-  });
-  (0, import_react6.useEffect)(() => {
-    if (state === newDesiredValue.current) {
-      endPending.current();
-    }
-  }, [state]);
-  return [state, setStateWithAwait];
-};
-
 // src/hooks/useStepsMap.ts
-var import_react7 = require("react");
+var import_react6 = require("react");
 var useStepsMap = () => {
-  const [currentStep, setCurrentStepState] = (0, import_react7.useState)(
+  const [currentStep, setCurrentStepState] = (0, import_react6.useState)(
     void 0
   );
-  const [steps, dispatch] = (0, import_react7.useReducer)((state, action) => {
+  const [steps, dispatch] = (0, import_react6.useReducer)((state, action) => {
     var _a;
     switch (action.type) {
       case "register":
@@ -946,50 +923,50 @@ var useStepsMap = () => {
         return state;
     }
   }, {});
-  const orderedSteps = (0, import_react7.useMemo)(
+  const orderedSteps = (0, import_react6.useMemo)(
     () => Object.values(steps).sort((a, b) => a.order - b.order),
     [steps]
   );
-  const stepIndex = (0, import_react7.useCallback)(
+  const stepIndex = (0, import_react6.useCallback)(
     (step = currentStep) => step ? orderedSteps.findIndex(
       (stepCandidate) => stepCandidate.order === step.order
     ) : -1,
     [currentStep, orderedSteps]
   );
-  const currentStepNumber = (0, import_react7.useMemo)(
+  const currentStepNumber = (0, import_react6.useMemo)(
     (step = currentStep) => stepIndex(step) + 1,
     [currentStep, stepIndex]
   );
-  const totalStepsNumber = (0, import_react7.useMemo)(() => orderedSteps.length, [orderedSteps]);
-  const getFirstStep = (0, import_react7.useCallback)(() => orderedSteps[0], [orderedSteps]);
-  const getLastStep = (0, import_react7.useCallback)(
+  const totalStepsNumber = (0, import_react6.useMemo)(() => orderedSteps.length, [orderedSteps]);
+  const getFirstStep = (0, import_react6.useCallback)(() => orderedSteps[0], [orderedSteps]);
+  const getLastStep = (0, import_react6.useCallback)(
     () => orderedSteps[orderedSteps.length - 1],
     [orderedSteps]
   );
-  const getPrevStep = (0, import_react7.useCallback)(
+  const getPrevStep = (0, import_react6.useCallback)(
     (step = currentStep) => step && orderedSteps[stepIndex(step) - 1],
     [currentStep, stepIndex, orderedSteps]
   );
-  const getNextStep = (0, import_react7.useCallback)(
+  const getNextStep = (0, import_react6.useCallback)(
     (step = currentStep) => step && orderedSteps[stepIndex(step) + 1],
     [currentStep, stepIndex, orderedSteps]
   );
-  const getNthStep = (0, import_react7.useCallback)(
+  const getNthStep = (0, import_react6.useCallback)(
     (n) => orderedSteps[n - 1],
     [orderedSteps]
   );
-  const isFirstStep = (0, import_react7.useMemo)(
+  const isFirstStep = (0, import_react6.useMemo)(
     () => currentStep === getFirstStep(),
     [currentStep, getFirstStep]
   );
-  const isLastStep = (0, import_react7.useMemo)(
+  const isLastStep = (0, import_react6.useMemo)(
     () => currentStep === getLastStep(),
     [currentStep, getLastStep]
   );
-  const registerStep = (0, import_react7.useCallback)((step) => {
+  const registerStep = (0, import_react6.useCallback)((step) => {
     dispatch({ type: "register", step });
   }, []);
-  const unregisterStep = (0, import_react7.useCallback)((stepName) => {
+  const unregisterStep = (0, import_react6.useCallback)((stepName) => {
     dispatch({ type: "unregister", stepName });
   }, []);
   return {
@@ -1012,7 +989,7 @@ var useStepsMap = () => {
 
 // src/contexts/CopilotProvider.tsx
 var MAX_START_TRIES = 120;
-var CopilotContext = (0, import_react8.createContext)(void 0);
+var CopilotContext = (0, import_react7.createContext)(void 0);
 var CopilotProvider = (_a) => {
   var _b = _a, {
     verticalOffset = 0,
@@ -1023,11 +1000,12 @@ var CopilotProvider = (_a) => {
     "children",
     "style"
   ]);
-  const startTries = (0, import_react8.useRef)(0);
-  const copilotEvents = (0, import_react8.useRef)((0, import_mitt.default)()).current;
-  const modal = (0, import_react8.useRef)(null);
-  const [visible, setVisibility] = useStateWithAwait(false);
-  const [scrollView, setScrollView] = (0, import_react8.useState)(null);
+  const startTries = (0, import_react7.useRef)(0);
+  const copilotEvents = (0, import_react7.useRef)((0, import_mitt.default)()).current;
+  const modal = (0, import_react7.useRef)(null);
+  const isStopping = (0, import_react7.useRef)(false);
+  const [visible, setVisibility] = (0, import_react7.useState)(false);
+  const [scrollView, setScrollView] = (0, import_react7.useState)(null);
   RNCSetStyle(style);
   const {
     currentStep,
@@ -1044,7 +1022,7 @@ var CopilotProvider = (_a) => {
     registerStep,
     unregisterStep
   } = useStepsMap();
-  const moveModalToStep = (0, import_react8.useCallback)(
+  const moveModalToStep = (0, import_react7.useCallback)(
     (step) => __async(void 0, null, function* () {
       var _a2;
       const size = yield step == null ? void 0 : step.measure();
@@ -1060,7 +1038,7 @@ var CopilotProvider = (_a) => {
     }),
     [verticalOffset]
   );
-  const setCurrentStep = (0, import_react8.useCallback)(
+  const setCurrentStep = (0, import_react7.useCallback)(
     (step, move = true) => __async(void 0, null, function* () {
       var _a2;
       setCurrentStepState(step);
@@ -1087,7 +1065,7 @@ var CopilotProvider = (_a) => {
     }),
     [moveModalToStep, scrollView, setCurrentStepState]
   );
-  const start = (0, import_react8.useCallback)(
+  const start = (0, import_react7.useCallback)(
     (fromStep, suppliedScrollView = null) => __async(void 0, null, function* () {
       if (scrollView == null) {
         setScrollView(suppliedScrollView);
@@ -1120,23 +1098,29 @@ var CopilotProvider = (_a) => {
       steps
     ]
   );
-  const stop = (0, import_react8.useCallback)(() => __async(void 0, null, function* () {
-    yield setVisibility(false);
+  (0, import_react7.useEffect)(() => {
+    if (isStopping.current && !visible) {
+      isStopping.current = false;
+      copilotEvents.emit("stop");
+    }
+  }, [copilotEvents, visible]);
+  const stop = (0, import_react7.useCallback)(() => __async(void 0, null, function* () {
+    setVisibility(false);
     copilotEvents.emit("stop");
   }), [copilotEvents, setVisibility]);
-  const next = (0, import_react8.useCallback)(() => __async(void 0, null, function* () {
+  const next = (0, import_react7.useCallback)(() => __async(void 0, null, function* () {
     yield setCurrentStep(getNextStep());
   }), [getNextStep, setCurrentStep]);
-  const nth = (0, import_react8.useCallback)(
+  const nth = (0, import_react7.useCallback)(
     (n) => __async(void 0, null, function* () {
       yield setCurrentStep(getNthStep(n));
     }),
     [getNthStep, setCurrentStep]
   );
-  const prev = (0, import_react8.useCallback)(() => __async(void 0, null, function* () {
+  const prev = (0, import_react7.useCallback)(() => __async(void 0, null, function* () {
     yield setCurrentStep(getPrevStep());
   }), [getPrevStep, setCurrentStep]);
-  const value = (0, import_react8.useMemo)(
+  const value = (0, import_react7.useMemo)(
     () => ({
       registerStep,
       unregisterStep,
@@ -1170,10 +1154,10 @@ var CopilotProvider = (_a) => {
       totalStepsNumber
     ]
   );
-  const onStepChangeEvent = (0, import_react8.useCallback)(() => {
+  const onStepChangeEvent = (0, import_react7.useCallback)(() => {
     copilotEvents.emit("stepChange", value.currentStep);
   }, [copilotEvents, value]);
-  return /* @__PURE__ */ import_react8.default.createElement(CopilotContext.Provider, { value }, /* @__PURE__ */ import_react8.default.createElement(import_react8.default.Fragment, null, /* @__PURE__ */ import_react8.default.createElement(
+  return /* @__PURE__ */ import_react7.default.createElement(CopilotContext.Provider, { value }, /* @__PURE__ */ import_react7.default.createElement(import_react7.default.Fragment, null, /* @__PURE__ */ import_react7.default.createElement(
     CopilotModal,
     __spreadProps(__spreadValues({
       ref: modal
@@ -1183,7 +1167,7 @@ var CopilotProvider = (_a) => {
   ), children));
 };
 var useCopilot = () => {
-  const value = (0, import_react8.useContext)(CopilotContext);
+  const value = (0, import_react7.useContext)(CopilotContext);
   if (value == null) {
     throw new Error("You must wrap your app inside CopilotProvider");
   }
@@ -1194,22 +1178,22 @@ var useCopilot = () => {
 init_style();
 var StepNumber = () => {
   const { currentStepNumber } = useCopilot();
-  return /* @__PURE__ */ import_react9.default.createElement(import_react_native8.View, { style: styles.stepNumber }, /* @__PURE__ */ import_react9.default.createElement(import_react_native8.Text, { style: styles.stepNumberText }, currentStepNumber));
+  return /* @__PURE__ */ import_react8.default.createElement(import_react_native8.View, { style: styles.stepNumber }, /* @__PURE__ */ import_react8.default.createElement(import_react_native8.Text, { style: styles.stepNumberText }, currentStepNumber));
 };
 
 // src/hocs/walkthroughable.tsx
-var import_react10 = __toESM(require("react"));
+var import_react9 = __toESM(require("react"));
 function walkthroughable(WrappedComponent) {
   const Component = (props) => {
     const _a = props, { copilot } = _a, rest = __objRest(_a, ["copilot"]);
-    return /* @__PURE__ */ import_react10.default.createElement(WrappedComponent, __spreadValues(__spreadValues({}, copilot), rest));
+    return /* @__PURE__ */ import_react9.default.createElement(WrappedComponent, __spreadValues(__spreadValues({}, copilot), rest));
   };
   Component.displayName = "Walkthroughable";
   return Component;
 }
 
 // src/components/CopilotStep.tsx
-var import_react11 = __toESM(require("react"));
+var import_react10 = __toESM(require("react"));
 var CopilotStep = ({
   name,
   order,
@@ -1225,9 +1209,9 @@ var CopilotStep = ({
   arrowPosition = "left"
 }) => {
   var _a, _b, _c, _d;
-  const registeredName = (0, import_react11.useRef)(null);
+  const registeredName = (0, import_react10.useRef)(null);
   const { registerStep, unregisterStep } = useCopilot();
-  const wrapperRef = import_react11.default.useRef(null);
+  const wrapperRef = import_react10.default.useRef(null);
   const safeEdge = {
     x: (_a = edge.x) != null ? _a : 0,
     y: (_b = edge.y) != null ? _b : 0,
@@ -1253,7 +1237,7 @@ var CopilotStep = ({
       measure2();
     });
   });
-  (0, import_react11.useEffect)(() => {
+  (0, import_react10.useEffect)(() => {
     if (active) {
       if (registeredName.current && registeredName.current !== name) {
         unregisterStep(registeredName.current);
@@ -1275,7 +1259,7 @@ var CopilotStep = ({
       registeredName.current = name;
     }
   }, [name, order, text, registerStep, unregisterStep, active]);
-  (0, import_react11.useEffect)(() => {
+  (0, import_react10.useEffect)(() => {
     if (active) {
       return () => {
         if (registeredName.current) {
@@ -1284,7 +1268,7 @@ var CopilotStep = ({
       };
     }
   }, [name, unregisterStep, active]);
-  const copilotProps = (0, import_react11.useMemo)(
+  const copilotProps = (0, import_react10.useMemo)(
     () => ({
       ref: wrapperRef,
       onLayout: () => {
@@ -1293,7 +1277,7 @@ var CopilotStep = ({
     }),
     []
   );
-  return import_react11.default.cloneElement(children, { copilot: copilotProps });
+  return import_react10.default.cloneElement(children, { copilot: copilotProps });
 };
 
 // src/index.ts

@@ -448,9 +448,10 @@ import React6, {
   createContext,
   useCallback as useCallback5,
   useContext,
+  useEffect as useEffect4,
   useMemo as useMemo2,
-  useRef as useRef5,
-  useState as useState6
+  useRef as useRef4,
+  useState as useState5
 } from "react";
 import { findNodeHandle } from "react-native";
 
@@ -910,33 +911,10 @@ var sanitize = (obj) => {
 // src/contexts/CopilotProvider.tsx
 init_style();
 
-// src/hooks/useStateWithAwait.ts
-import { useEffect as useEffect4, useRef as useRef4, useState as useState4 } from "react";
-var useStateWithAwait = (initialState) => {
-  const endPending = useRef4(() => {
-  });
-  const newDesiredValue = useRef4(initialState);
-  const [state, setState] = useState4(initialState);
-  const setStateWithAwait = (newState) => __async(void 0, null, function* () {
-    const pending = new Promise((resolve) => {
-      endPending.current = resolve;
-    });
-    newDesiredValue.current = newState;
-    setState(newState);
-    yield pending;
-  });
-  useEffect4(() => {
-    if (state === newDesiredValue.current) {
-      endPending.current();
-    }
-  }, [state]);
-  return [state, setStateWithAwait];
-};
-
 // src/hooks/useStepsMap.ts
-import { useCallback as useCallback4, useMemo, useReducer, useState as useState5 } from "react";
+import { useCallback as useCallback4, useMemo, useReducer, useState as useState4 } from "react";
 var useStepsMap = () => {
-  const [currentStep, setCurrentStepState] = useState5(
+  const [currentStep, setCurrentStepState] = useState4(
     void 0
   );
   const [steps, dispatch] = useReducer((state, action) => {
@@ -1031,11 +1009,12 @@ var CopilotProvider = (_a) => {
     "children",
     "style"
   ]);
-  const startTries = useRef5(0);
-  const copilotEvents = useRef5(mitt()).current;
-  const modal = useRef5(null);
-  const [visible, setVisibility] = useStateWithAwait(false);
-  const [scrollView, setScrollView] = useState6(null);
+  const startTries = useRef4(0);
+  const copilotEvents = useRef4(mitt()).current;
+  const modal = useRef4(null);
+  const isStopping = useRef4(false);
+  const [visible, setVisibility] = useState5(false);
+  const [scrollView, setScrollView] = useState5(null);
   RNCSetStyle(style);
   const {
     currentStep,
@@ -1128,8 +1107,14 @@ var CopilotProvider = (_a) => {
       steps
     ]
   );
+  useEffect4(() => {
+    if (isStopping.current && !visible) {
+      isStopping.current = false;
+      copilotEvents.emit("stop");
+    }
+  }, [copilotEvents, visible]);
   const stop = useCallback5(() => __async(void 0, null, function* () {
-    yield setVisibility(false);
+    setVisibility(false);
     copilotEvents.emit("stop");
   }), [copilotEvents, setVisibility]);
   const next = useCallback5(() => __async(void 0, null, function* () {
@@ -1217,7 +1202,7 @@ function walkthroughable(WrappedComponent) {
 }
 
 // src/components/CopilotStep.tsx
-import React9, { useEffect as useEffect5, useMemo as useMemo3, useRef as useRef6 } from "react";
+import React9, { useEffect as useEffect5, useMemo as useMemo3, useRef as useRef5 } from "react";
 var CopilotStep = ({
   name,
   order,
@@ -1233,7 +1218,7 @@ var CopilotStep = ({
   arrowPosition = "left"
 }) => {
   var _a, _b, _c, _d;
-  const registeredName = useRef6(null);
+  const registeredName = useRef5(null);
   const { registerStep, unregisterStep } = useCopilot();
   const wrapperRef = React9.useRef(null);
   const safeEdge = {
